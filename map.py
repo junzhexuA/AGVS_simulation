@@ -9,6 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D
 # 出口单元 3
 # 投递单元 4
 # 预留单元 5
+# 其他AGV 6
 # 其他单元 0
 
 

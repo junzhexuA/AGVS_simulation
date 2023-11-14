@@ -2,7 +2,7 @@ import numpy as np
 
 def simulate_arrival(n, total_goods, lambda_, duration):
     # 商品种类
-    goods_type = [1, 2, 3]
+    goods_type = [1, 2, 3, 0]
 
     # 投递口数量
     n = n
@@ -12,7 +12,6 @@ def simulate_arrival(n, total_goods, lambda_, duration):
 
     for i in range(n):
         arrival_sequence = []
-        gi = i
         for second in range(duration):
         # 每秒到达的商品数量
             arrival_num = np.random.poisson(lambda_)
@@ -23,20 +22,15 @@ def simulate_arrival(n, total_goods, lambda_, duration):
                 # 更新商品总量
                 total_goods[goods_index] -= arrival_num
                 # 如果商品总量小于0，设置为0
-                if total_goods[goods_index] < 0:
-                    arrival_num = total_goods[goods_index]
-                    total_goods[goods_index] = 0
-                    goods_type.remove(goods_index)
-                    print(f"商品{total_goods[goods_index]}搬运任务以完成")
-                    
+                total_goods[goods_index] = max(0, total_goods[goods_index])
                 # 添加到到达序列
                 arrival_sequence.append(goods_type[goods_index])
             else:
                 # 如果没有商品到达，添加0到到达序列
                 arrival_sequence.append(goods_type[-1])
-        for ti, k in enumerate(arrival_sequence):
-            if k>0:
-                arrival_sequences.append([gi,ti,i])
+        for ti, j in enumerate(arrival_sequence):
+            if j>0:
+                arrival_sequences.append([i,ti,j])
 
 
     return arrival_sequences
@@ -53,12 +47,6 @@ def covert2start(arrival_sequences):
 
 # 测试函数
 if __name__ == '__main__':
-    n = 6 #入口数量
-    total_goods = [10, 15, 20] #商品总数
-    lambda_ = 0.25 #到达率，件/秒
-    duration = 60 #模拟未来1分钟
-
-    #生成到达商品序列
-    arrival_sequences = simulate_arrival(n, total_goods, lambda_, duration)
+    arrival_sequences = simulate_arrival(6, [100, 150, 200], 0.25, 30)
     starts = covert2start(arrival_sequences)
-    print(arrival_sequences)
+    print(starts)
