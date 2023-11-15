@@ -15,7 +15,7 @@ if __name__ == '__main__':
     #转化成起点信息
     start = covert2start(arrival_sequences)
     end = [raw_map.rand_end() for _ in range(len(start))]'''
-    start = [(0,0,1),(9,1,7),(9,7,7),(9,4,10)]
+    start = [(0,0,1),(9,1,8),(9,7,7),(9,4,10)]
     end = [(6,5),(3,2),(6,2),(6,2)]
     print('地图：\n',raw_map.map)
     print('出发点：',start)

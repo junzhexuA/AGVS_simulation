@@ -44,9 +44,12 @@ def Astar(array, start, goal, StTable):
     gscore = {start:0}
     fscore = {start:heuristic(start, goal, array)}
     oheap = []
-    #初始化方向
-    last_orientation=(0,0)
 
+    #初始化方向，位于上方入口（行索引为0），初始方向向下；位于下方入口，初始方向向上
+    if start[0] == 0:
+        last_orientation=(1,0)
+    if start[0] == len(array)-1:
+        last_orientation=(-1,0)
 
     heapq.heappush(oheap, (fscore[start], start))
 
@@ -68,7 +71,14 @@ def Astar(array, start, goal, StTable):
         # 判断该点可达的邻居
         neighbors=find_neighbors(current,array)
         for i, j in neighbors:
-            neighbor = current[0] + i, current[1] + j, current[2] + 1  #这个地方有BUG，这里默认到达邻居的时间步是+1，但是如果需要转弯才能到达这里应该+2
+            # 判断是否转向
+            if current in came_from.keys():
+                last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1])
+            #判断是否转向,若转向则时间步+2,否则时间步+1
+            if last_orientation!=(i,j):
+                neighbor = current[0] + i, current[1] + j, current[2] + 2
+            else:
+                neighbor = current[0] + i, current[1] + j, current[2] + 1  
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:
                     # 判断是否为障碍物 此处可以改成其他限制条件
@@ -79,26 +89,24 @@ def Astar(array, start, goal, StTable):
                     #判断是否为动态障碍物，即优先级高的AGV在该时间步的位置
                     if neighbor[2]+1 <= len(StTable):
                         if StTable[neighbor[2]][neighbor[0]][neighbor[1]] == 6:
-                            continue                 
+                            continue          
                 else:
                     # 超出边界
                     continue
             else:
                 # 超出边界
                 continue
-            # 判断是否转向
-            if current in came_from.keys():
-                last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1])
+
             # 如果要转向，距离额外加1
             if last_orientation!=(i,j):
                 tentative_g_score = gscore[current] + heuristic(current, neighbor,array)+1
             else:
                 tentative_g_score = gscore[current] + heuristic(current, neighbor,array)
             # 如果距离更远，排除
-            if neighbor in close_set  and tentative_g_score >= gscore.get(neighbor, 0):
+            if neighbor in close_set  and tentative_g_score > gscore.get(neighbor, 0):
                 continue
             # 如果距离更近，更新
-            if  tentative_g_score < gscore.get(neighbor, 0) or (neighbor not in [i[1]for i in oheap]):
+            if  tentative_g_score <= gscore.get(neighbor, 0) or (neighbor not in [i[1]for i in oheap]):
                 came_from[neighbor] = current
                 gscore[neighbor] = tentative_g_score
                 fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
