@@ -19,7 +19,6 @@ def find_neighbors(point,array=None):
         neighbors.append((-1,0))
     return neighbors
 
-#好像存在bug
 def update_StTable(raw_map, StTable, path):
     if len(StTable) - 1 < path[-1][2]:
         new_time_step = path[-1][2] - len(StTable) + 1
@@ -73,41 +72,49 @@ def StAstar(array, start, goal, StTable):
                 return data[::-1]
         # 判断该点可达的邻居
         neighbors=find_neighbors(current,array)
-
         for i, j in neighbors:
             # 判断是否转向
             if current in came_from.keys():
-               last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1])   ##这里有BUG，如果第n时间步转弯，n+1时间不原点等待，算出来方向会被更新为(0，0)
+               if current[0] != came_from[current][0] or current[1] != came_from[current][1]:
+                   last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1]) #若停留的话last_orientation会成为(0,0),修改后停留时方向不变 
             #判断是否转向,若转向则时间步+2,否则时间步+1
             if last_orientation != (i,j):
                 neighbor = current[0] + i, current[1] + j, current[2] + 2
             if last_orientation == (i,j):
                 neighbor = current[0] + i, current[1] + j, current[2] + 1  
 
+            # 约束：1.静态障碍物; 2.地图边界； 3.动态障碍
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:
                     # 判断是否为障碍物 此处可以改成其他限制条件
                     if array[neighbor[0]][neighbor[1]] == 5:
+                        signal = 0
                         continue
                     if array[neighbor[0]][neighbor[1]] == 4 and neighbor != goal:
+                        signal = 0
                         continue
                     #判断是否为动态障碍物，即优先级高的AGV在该时间步的位置
                     if neighbor[2]+1 <= len(StTable):
                         if StTable[neighbor[2]][neighbor[0]][neighbor[1]] == 6:
-                            continue          
+                            signal = 0
+                            continue        
                 else:
                     # 超出边界
+                    signal = 0
                     continue
             else:
                 # 超出边界
-                continue   
+                signal = 0
+                continue
+            
             # 如果要转向，距离额外加1
             if last_orientation!=(i,j):
-                tentative_g_score = gscore[current] + heuristic(current, neighbor,array) + 1  
+                tentative_g_score = gscore[current] + heuristic(current, neighbor, array) + 1  
             else:
-                tentative_g_score = gscore[current] + heuristic(current, neighbor,array)
+                tentative_g_score = gscore[current] + heuristic(current, neighbor, array)
             # 如果距离更远，排除
             if neighbor in close_set  and tentative_g_score > gscore.get(neighbor, 0):
+                signal = 0
                 continue
             # 如果距离更近，更新
             if  tentative_g_score <= gscore.get(neighbor, 0) or (neighbor not in [i[1]for i in oheap]):
@@ -127,14 +134,18 @@ def StAstar(array, start, goal, StTable):
                     fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
                     heapq.heappush(oheap, (fscore[neighbor], neighbor))
                     signal=1
-                '''came_from[neighbor] = current
+                '''
+                came_from[neighbor] = current
                 gscore[neighbor] = tentative_g_score
                 fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
                 heapq.heappush(oheap, (fscore[neighbor], neighbor))
-                signal=1'''
-        if ~signal:
-            tentative_g_score = gscore[current] + 1
+                signal=1
+                '''
+        #若没有搜寻到路径则在原地等待
+        if signal == 0:
+            tentative_g_score = gscore[current]+1
             current=(current[0] , current[1] , current[2]+1)
+            came_from[current] = (current[0] , current[1] , current[2]-1)
             gscore[current] = tentative_g_score
             fscore[current] = tentative_g_score + heuristic(current, goal,array)
             heapq.heappush(oheap, (fscore[current], current))

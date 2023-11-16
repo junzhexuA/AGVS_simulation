@@ -25,7 +25,7 @@ if __name__ == '__main__':
     ST_Table = np.expand_dims(raw_map.map, axis=0)
     for i in range(len(start)):
         road=StAstar(raw_map.map,start[i],end[i],ST_Table)
-        print('A*  最短路径：',road) 
+        print(f'商品{i}最短路径：',road) 
         ST_Table = update_StTable(raw_map.map,ST_Table,road[:-1])
         # visualize_map(raw_map.map, start[i], end[i], road)
         path.append(road)
