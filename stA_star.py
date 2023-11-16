@@ -34,7 +34,10 @@ def update_StTable(raw_map, StTable, path):
             StTable[node[2]][node[0]][node[1]] = 6
     return StTable
 
-def Astar(array, start, goal, StTable):
+def FullPathGenerate(path):
+    pass
+
+def StAstar(array, start, goal, StTable):
     """
     A* 寻路算法
     """
@@ -47,9 +50,9 @@ def Astar(array, start, goal, StTable):
 
     #初始化方向，位于上方入口（行索引为0），初始方向向下；位于下方入口，初始方向向上
     if start[0] == 0:
-        last_orientation=(1,0)
+        last_orientation = (1,0)
     if start[0] == len(array)-1:
-        last_orientation=(-1,0)
+        last_orientation = (-1,0)
 
     heapq.heappush(oheap, (fscore[start], start))
 
@@ -70,15 +73,15 @@ def Astar(array, start, goal, StTable):
                 return data[::-1]
         # 判断该点可达的邻居
         neighbors=find_neighbors(current,array)
+
         for i, j in neighbors:
-            # 判断是否转向
-            if current in came_from.keys():
-                last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1])
+
             #判断是否转向,若转向则时间步+2,否则时间步+1
-            if last_orientation!=(i,j):
+            if last_orientation != (i,j):
                 neighbor = current[0] + i, current[1] + j, current[2] + 2
-            else:
+            if last_orientation == (i,j):
                 neighbor = current[0] + i, current[1] + j, current[2] + 1  
+
             if 0 <= neighbor[0] < array.shape[0]:
                 if 0 <= neighbor[1] < array.shape[1]:
                     # 判断是否为障碍物 此处可以改成其他限制条件
@@ -97,9 +100,12 @@ def Astar(array, start, goal, StTable):
                 # 超出边界
                 continue
 
+            # 判断是否转向
+            if current in came_from.keys():
+                last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1])   ##这里有BUG，如果第n时间步转弯，n+1时间不原点等待，算出来方向会被更新为(0，0)   
             # 如果要转向，距离额外加1
             if last_orientation!=(i,j):
-                tentative_g_score = gscore[current] + heuristic(current, neighbor,array)+1
+                tentative_g_score = gscore[current] + heuristic(current, neighbor,array) + 1  
             else:
                 tentative_g_score = gscore[current] + heuristic(current, neighbor,array)
             # 如果距离更远，排除
@@ -107,14 +113,25 @@ def Astar(array, start, goal, StTable):
                 continue
             # 如果距离更近，更新
             if  tentative_g_score <= gscore.get(neighbor, 0) or (neighbor not in [i[1]for i in oheap]):
-                came_from[neighbor] = current
-                gscore[neighbor] = tentative_g_score
-                fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
-                heapq.heappush(oheap, (fscore[neighbor], neighbor))
-                signal=1
+                #若时间步差1，则表示无转向和等待
+                if neighbor[2] - current[2] == 1:
+                    came_from[neighbor] = current
+                    gscore[neighbor] = tentative_g_score
+                    fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
+                    heapq.heappush(oheap, (fscore[neighbor], neighbor))
+                    signal=1
+                #若时间步差2，则表示转向和等待   
+                if neighbor[2] - current[2] > 1:
+                    tmp = current[0], current[1], current[2] + 1
+                    came_from[tmp] = current
+                    came_from[neighbor] = tmp
+                    gscore[neighbor] = tentative_g_score
+                    fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
+                    heapq.heappush(oheap, (fscore[neighbor], neighbor))
+                    signal=1
         if ~signal:
-            tentative_g_score = gscore[current]+1
-            current=(current[0] , current[1] , current[2] + 1)
+            tentative_g_score = gscore[current] + 1
+            current=(current[0] , current[1] , current[2]+1)
             gscore[current] = tentative_g_score
             fscore[current] = tentative_g_score + heuristic(current, goal,array)
             heapq.heappush(oheap, (fscore[current], current))
