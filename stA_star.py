@@ -75,7 +75,9 @@ def StAstar(array, start, goal, StTable):
         neighbors=find_neighbors(current,array)
 
         for i, j in neighbors:
-
+            # 判断是否转向
+            if current in came_from.keys():
+               last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1])   ##这里有BUG，如果第n时间步转弯，n+1时间不原点等待，算出来方向会被更新为(0，0)
             #判断是否转向,若转向则时间步+2,否则时间步+1
             if last_orientation != (i,j):
                 neighbor = current[0] + i, current[1] + j, current[2] + 2
@@ -98,11 +100,7 @@ def StAstar(array, start, goal, StTable):
                     continue
             else:
                 # 超出边界
-                continue
-
-            # 判断是否转向
-            if current in came_from.keys():
-                last_orientation=(current[0]-came_from[current][0],current[1]-came_from[current][1])   ##这里有BUG，如果第n时间步转弯，n+1时间不原点等待，算出来方向会被更新为(0，0)   
+                continue   
             # 如果要转向，距离额外加1
             if last_orientation!=(i,j):
                 tentative_g_score = gscore[current] + heuristic(current, neighbor,array) + 1  
@@ -129,6 +127,11 @@ def StAstar(array, start, goal, StTable):
                     fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
                     heapq.heappush(oheap, (fscore[neighbor], neighbor))
                     signal=1
+                '''came_from[neighbor] = current
+                gscore[neighbor] = tentative_g_score
+                fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
+                heapq.heappush(oheap, (fscore[neighbor], neighbor))
+                signal=1'''
         if ~signal:
             tentative_g_score = gscore[current] + 1
             current=(current[0] , current[1] , current[2]+1)
