@@ -36,10 +36,24 @@ def update_StTable(raw_map, StTable, path):
 def FullPathGenerate(path):
     pass
 
+def update_start(StTable, start):
+    if len(StTable) - 1 >= start[2]:
+        # 检查新的start是否已经被使用过
+        if is_start_used(StTable, start):
+            return update_start(StTable, (start[0], start[1], start[2] + 1))
+    return start
+
+def is_start_used(StTable, start):
+    # 检查start是否占用
+    return StTable[start[2]][start[0]][start[1]] == 6
+
 def StAstar(array, start, goal, StTable):
     """
     A* 寻路算法
     """
+    if len(StTable) - 1 >= start[2]:
+        while StTable[start[2]][start[0]][start[1]] == 6:
+            start = update_start(StTable,start)
 
     close_set = set()
     came_from = {}
@@ -52,7 +66,7 @@ def StAstar(array, start, goal, StTable):
         last_orientation = (1,0)
     if start[0] == len(array)-1:
         last_orientation = (-1,0)
-
+    
     heapq.heappush(oheap, (fscore[start], start))
 
     while oheap:
@@ -97,7 +111,12 @@ def StAstar(array, start, goal, StTable):
                     if neighbor[2]+1 <= len(StTable):
                         if StTable[neighbor[2]][neighbor[0]][neighbor[1]] == 6:
                             signal = 0
-                            continue        
+                            continue
+                        #若要在原地转向等待一个时间步，需要判断当前节点时间步+1是否被优先级更高任务占用
+                        if last_orientation != (i,j):
+                            if StTable[current[2]+1][current[0]][current[1]] == 6:
+                                signal = 0
+                                continue
                 else:
                     # 超出边界
                     signal = 0
@@ -143,10 +162,22 @@ def StAstar(array, start, goal, StTable):
                 '''
         #若没有搜寻到路径则在原地等待
         if signal == 0:
-            tentative_g_score = gscore[current]+1
-            current=(current[0] , current[1] , current[2]+1)
-            came_from[current] = (current[0] , current[1] , current[2]-1)
-            gscore[current] = tentative_g_score
-            fscore[current] = tentative_g_score + heuristic(current, goal,array)
-            heapq.heappush(oheap, (fscore[current], current))
+            if len(StTable)-1 >= current[2]+1:
+                if StTable[current[2]+1][current[0]][current[1]] != 6:
+                    tentative_g_score = gscore[current]+1
+                    current=(current[0] , current[1] , current[2]+1)
+                    came_from[current] = (current[0] , current[1] , current[2]-1)
+                    gscore[current] = tentative_g_score
+                    fscore[current] = tentative_g_score + heuristic(current, goal,array)
+                    heapq.heappush(oheap, (fscore[current], current))
+                #下一时刻被前序任务占用
+                else:
+                    continue
+            else:
+                tentative_g_score = gscore[current]+1
+                current=(current[0] , current[1] , current[2]+1)
+                came_from[current] = (current[0] , current[1] , current[2]-1)
+                gscore[current] = tentative_g_score
+                fscore[current] = tentative_g_score + heuristic(current, goal,array)
+                heapq.heappush(oheap, (fscore[current], current))
     return None
