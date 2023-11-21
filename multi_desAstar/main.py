@@ -1,6 +1,7 @@
 from map import *
 from stA_star import StAstar
 from stA_star import update_StTable
+from stA_star import find_nearest_exit
 from GoodsArrival import *
 import random
 import numpy as np
@@ -36,9 +37,9 @@ if __name__ == '__main__':
         ST_Table = update_StTable(raw_map.map,ST_Table,road)
         transpath.append(road)
 
-    #按照到达终点的时间排序，形成新的起点，形成随机终点，规划AGV离开路径    
+    #形成新的起点，形成随机终点，规划AGV离开路径    
     start_new = [(transpath[i][-1][0],transpath[i][-1][1],transpath[i][-1][2]+1) for i in range(len(transpath))]
-    end_new = [raw_map.rand_exit() for _ in range(len(transpath))]
+    end_new = [find_nearest_exit(raw_map.map,start_new[i]) for i in range(len(transpath))]
     #print('出发点：',start_new)
     #print('出口：',end_new)
     for i in range(len(start_new)):

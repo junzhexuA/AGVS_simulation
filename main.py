@@ -5,7 +5,7 @@ from GoodsArrival import *
 import random
 import numpy as np
 
-random.seed(42)
+#random.seed(42)
 
 if __name__ == '__main__':
     raw_map = Map()

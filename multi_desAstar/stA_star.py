@@ -7,6 +7,19 @@ def heuristic(a, b, array,raw_orientation=None,new_orientation=None):
     """
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
+def calculate_distance(pos1, pos2):
+    return np.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+
+#搜索map中最近的出口
+def find_nearest_exit(map_array, start):
+    pos_of_exits = np.argwhere(map_array == 3)
+    pos_of_exits.tolist()
+    distances = [calculate_distance(start, (x, y)) for x, y in pos_of_exits]
+    min_distance = min(distances)
+    closest_position = pos_of_exits[distances.index(min_distance)]
+    
+    return (closest_position[0],closest_position[1])
+
 def find_neighbors(point,array=None):
     neighbors=[]
     if point[0] in [1,4,7]:
@@ -111,7 +124,7 @@ def StAstar(array, start, goal, StTable):
                     if array[neighbor[0]][neighbor[1]] == 4 and neighbor != goal:
                         signal = 0
                         continue
-                    '''#判断是否为动态障碍物，即优先级高的AGV在该时间步的位置
+                    '''#判断是否为动态障碍物,即优先级高的AGV在该时间步的位置
                     if neighbor[2]+1 <= len(StTable):
                         if StTable[neighbor[2]][neighbor[0]][neighbor[1]] == 6:
                             signal = 0
