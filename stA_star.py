@@ -33,9 +33,6 @@ def update_StTable(raw_map, StTable, path):
             StTable[node[2]][node[0]][node[1]] = 6
     return StTable
 
-def FullPathGenerate(path):
-    pass
-
 def update_start(StTable, start):
     if len(StTable) - 1 >= start[2]:
         # 检查新的start是否已经被使用过
@@ -83,7 +80,7 @@ def StAstar(array, start, goal, StTable):
                     data.append(current)
                     current = came_from[current]
                 data.append(start)
-                return data[::-1]
+                return data[::-1], data[1][2] - data[-1][2]
         # 判断该点可达的邻居
         neighbors=find_neighbors(current,array)
         for i, j in neighbors:

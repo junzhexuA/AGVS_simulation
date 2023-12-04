@@ -48,6 +48,7 @@ def update_StTable(raw_map, StTable, path):
 
 def update_start(StTable, start):
     if len(StTable) - 1 >= start[2]:
+        print(len(StTable))
         # 检查新的start是否已经被使用过
         if is_start_used(StTable, start):
             return update_start(StTable, (start[0], start[1], start[2] + 1))
