@@ -8,6 +8,8 @@ ___
 <div align="center">
 <img src="https://github.com/junzhexuA/StAstar/blob/master/agv_simulation.gif" height="500" width="500"/>
 </div>
+
 ___
+
 ## 大规模地图演示
 
