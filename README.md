@@ -12,4 +12,6 @@ ___
 ___
 
 ## 大规模地图演示
-
+<div align="center">
+<img src="https://github.com/junzhexuA/StAstar/blob/master/agv_simulation_big.gif" height="500" width="500"/>
+</div>
