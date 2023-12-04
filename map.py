@@ -15,7 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class Map:
     def __init__(self):
-        excel_path='map.xlsx'
+        excel_path='big_map.xlsx'
         df=pd.read_excel(excel_path,header=None)
         self.map=np.array(df)
     def rand_start(self):

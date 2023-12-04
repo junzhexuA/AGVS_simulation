@@ -34,15 +34,27 @@ class task:
         return (closest_position[0],closest_position[1])
     
     def find_neighbors(self, point,array=None):
+        # 小型地图
         neighbors=[]
-        if point[0] in [1,4,7]:
+        '''if point[0] in [1,4,7]:
             neighbors.append((0,1))
         if point[0] in [2,5,8]:
             neighbors.append((0,-1))
         if point[1] in [0,3,6]:
             neighbors.append((1,0))
         if point[1] in [1,4,7]:
+            neighbors.append((-1,0))'''
+
+        # 大型地图
+        if point[0] in [1,4,7,10,13,16,19,22,25]:
+            neighbors.append((0,1))
+        if point[0] in [2,5,8,11,14,17,20,23,26]:
+            neighbors.append((0,-1))
+        if point[1] in [0,3,6,9,12,15,18,21,24,27,30]:
+            neighbors.append((1,0))
+        if point[1] in [1,4,7,10,13,16,19,22,25,28,31]:
             neighbors.append((-1,0))
+
         return neighbors
 
 
@@ -63,6 +75,8 @@ class task:
             last_orientation = (1,0)
         if start[0] == len(array)-1:
             last_orientation = (-1,0)
+        
+        '''# 投递口周围初始方向，小型地图
         if start[0] in [2,5]:
             last_orientation = (0,-1)
         if start[0] in [4,7]:
@@ -70,8 +84,18 @@ class task:
         if start[1] in [1,4]:
             last_orientation = (-1,0)
         if start[1] in [3,6]:
-            last_orientation = (1,0)
+            last_orientation = (1,0)'''
         
+        # 投递口周围初始方向，大型地图
+        if start[0] in [2,5,8,11,14,17,20,23]:
+            last_orientation = (0,-1)
+        if start[0] in [4,7,10,13,16,19,22,25]:
+            last_orientation = (0,1)
+        if start[1] in [1,4,7,10,13,16,19,22,25,28]:
+            last_orientation = (-1,0)
+        if start[1] in [3,6,9,12,15,18,21,24,27,30]:
+            last_orientation = (1,0)
+
         heapq.heappush(oheap, (fscore[start], start))
 
         while oheap:
