@@ -82,7 +82,7 @@ exits = np.argwhere(matrix == 3)
 destinations = np.argwhere(matrix == 4)
 
 # 生成随机到达任务时间列表
-arrival_time_list = [random.randint(0,10) for i in range(60)]
+arrival_time_list = [random.randint(0,10) for i in range(8)]
 arrival_time_list.sort()
 
 
@@ -103,7 +103,7 @@ for i in range(len(task_list)):
 agvs = []
 agv_matrix = copy.deepcopy(matrix)
 V_max = 1
-time_Step = 45
+time_Step = 28
 tmp = copy.deepcopy(arrival_time_list) #拷贝到达时间列表
 cmap = colors.ListedColormap(['blue','red','white','white','white','white','black','gray'])
 bounds = [-2,-1, 0, 1, 2, 3, 4, 5, 6]
@@ -134,10 +134,17 @@ ax.grid(color='black', linestyle='-', linewidth=1)
 ax.set_title('AGV Simulation')
 
 # 进行仿真，每次刷新间隔1000毫秒
-animation = FuncAnimation(fig, simulate, fargs=(ax, agv_matrix), frames=time_Step, repeat=False, blit=True, interval=1000)
+animation = FuncAnimation(fig, simulate, fargs=(ax, agv_matrix), frames=time_Step, repeat=True, blit=False, interval=1000)
 plt.show()
-# 保存动画为gif文件
-# animation.save('agv_animation.gif', writer='pillow', fps=1)
+
+# 保存动画为GIF
+animation.save('agv_simulation.gif', writer='imagemagick', fps=10)
+
+
+
+
+
+
 
 
 
