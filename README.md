@@ -4,6 +4,10 @@ This project extends the traditional A* algorithm into the space-time continuum,
 
 **Currently, this algorithm is implemented in a task assignment model for a multi-AGV based intelligent logistics sorting system, aiming to calculate the optimal delivery positions for goods sorting. I will further optimize the iteration**
 🤔
+
+![Static Badge](https://img.shields.io/badge/Author-Junzhe_XU-blue)
+
+![LICENSE](https://img.shields.io/badge/license-MIT-green)
 ___
 ## 小规模地图演示
 `Gird Size`: 10*8
