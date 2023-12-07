@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import random
 from Task import *
 from AGV import *
@@ -7,7 +8,31 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib.colors as colors
 
-def simulate(frame, ax, agv_matrix):
+def load_map(filepath):
+    matrix = np.array(pd.read_excel(filepath, header=None))
+    entrances = np.argwhere(matrix == 2)
+    exits = np.argwhere(matrix == 3)
+    destinations = np.argwhere(matrix == 4)
+    return matrix, entrances, exits, destinations
+
+def generate_task(matrix, entrances, destinations, arrival_time_list):
+
+    # 生成任务列表
+    task_list = []
+    for i in range(len(arrival_time_list)):
+        task_list.append(task(tuple(random.choice(entrances)),tuple(random.choice(destinations)),arrival_time_list[i],matrix))
+        # 若任务时间和起点和之前的任务相同，则重置该任务
+        if i>0:
+            while task_list[i].entrance == task_list[i-1].entrance and task_list[i].arrival_time == task_list[i-1].arrival_time:
+                task_list[i] = task(tuple(random.choice(entrances)),tuple(random.choice(destinations)),arrival_time_list[i],matrix) #逻辑待修改
+
+    # 输出任务列表
+    for i in range(len(task_list)):
+        print(f"任务{i}开始时间:",task_list[i].arrival_time, f"任务{i}起点：", task_list[i].entrance, f"任务{i}投递口：", task_list[i].destination, f"任务{i}出口：", task_list[i].exit)
+
+    return task_list
+
+def simulate(frame, ax, agv_matrix, task_list, arrival_time_list):
     global agvs, tmp
 
     print("第", frame, "步")
@@ -59,119 +84,64 @@ def simulate(frame, ax, agv_matrix):
 
     return [ax]
 
+def main(matrix, entrances, exits, destinations, arrival_time_list, task_list, agvs, V_max, time_Step):
+    agv_matrix = copy.deepcopy(matrix)
+    cmap = colors.ListedColormap(['blue','red','white','white','white','white','black','gray'])
+    bounds = [-2,-1, 0, 1, 2, 3, 4, 5, 6]
+    norm = colors.BoundaryNorm(bounds, cmap.N)
 
-random.seed(42)
+    # 初始化地图画布
+    fig, ax = plt.subplots(figsize=(5, 5))
 
-# 定义路网矩阵
-'''matrix = np.array([
-    [2, 3, 5, 2, 3, 5, 2, 3],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [1, 1, 4, 1, 1, 4, 1, 1],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [1, 1, 4, 1, 1, 4, 1, 1],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [0, 0, 1, 0, 0, 1, 0, 0],
-    [3, 2, 5, 3, 2, 5, 3, 2]
-])'''
+    # 绘制初始 agv_matrix，排除 -1 和 -2 的部分
+    for i in range(len(agv_matrix)):
+        for j in range(len(agv_matrix[i])):
+            if agv_matrix[i][j] not in [-1, -2]:
+                rect = plt.Rectangle((j-0.5, i-0.5), 1, 1, color=cmap(norm(agv_matrix[i][j])))
+                ax.add_patch(rect)
 
-matrix = np.array([
-[2,3,5,2,3,5,2,3,5,2,3,5,2,3,5,2,3,5,2,3,5,2,3,5,2,3,5,2,3,5,2,3],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1,4,1,1],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
-[3,2,5,3,2,5,3,2,5,3,2,5,3,2,5,3,2,5,3,2,5,3,2,5,3,2,5,3,2,5,3,2]
-])
+    # 重新设置坐标轴的限制和比例，包括边框
+    ax.set_xlim(-0.5, len(agv_matrix[0])-0.5)
+    ax.set_ylim(len(agv_matrix)-0.5, -0.5)
+    ax.set_aspect('equal')
+    ax.spines['top'].set_visible(True)
+    ax.spines['right'].set_visible(True)
+    ax.spines['bottom'].set_visible(True)
+    ax.spines['left'].set_visible(True)
+    ax.set_xticks(np.arange(-0.5, len(agv_matrix[0])-0.5, 1))
+    ax.set_yticks(np.arange(-0.5, len(agv_matrix)-0.5, 1))
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.grid(color='black', linestyle='-', linewidth=1)
+    ax.set_title('AGV Simulation')
 
-entrances = np.argwhere(matrix == 2)
-exits = np.argwhere(matrix == 3)
-destinations = np.argwhere(matrix == 4)
+    # 进行仿真，每次刷新间隔1000毫秒
+    animation = FuncAnimation(fig, simulate, fargs=(ax, agv_matrix, task_list, arrival_time_list), frames=time_Step, repeat=False, blit=False, interval=1000)
+    plt.show()
 
-# 生成随机到达任务时间列表
-arrival_time_list = [random.randint(0,10) for i in range(60)]
-arrival_time_list.sort()
+    # 保存动画为GIF
+    #animation.save('agv_simulation_big.gif', writer='imagemagick', fps=10)
 
 
-# 生成任务列表
-task_list = []
-for i in range(len(arrival_time_list)):
-    task_list.append(task(tuple(random.choice(entrances)),tuple(random.choice(destinations)),arrival_time_list[i],matrix))
-    # 若任务时间和起点和之前的任务相同，则重置该任务
-    if i>0:
-        while task_list[i].entrance == task_list[i-1].entrance and task_list[i].arrival_time == task_list[i-1].arrival_time:
-            task_list[i] = task(tuple(random.choice(entrances)),tuple(random.choice(destinations)),arrival_time_list[i],matrix)
+if __name__ == '__main__':
+    random.seed(42)
+    # 路网矩阵 
+    matrix, entrances, exits, destinations = load_map('CAsimulator\map_file\small_map.xlsx')
 
+    # 生成随机到达任务时间列表
+    arrival_time_list = [random.randint(0,10) for i in range(10)]
+    arrival_time_list.sort()
 
-for i in range(len(task_list)):
-    print(f"任务{i}开始时间:",task_list[i].arrival_time, f"任务{i}起点：", task_list[i].entrance, f"任务{i}投递口：", task_list[i].destination, f"任务{i}出口：", task_list[i].exit)
+    # 生成任务列表
+    task_list = generate_task(matrix, entrances, destinations, arrival_time_list)
 
-
-agvs = []
-agv_matrix = copy.deepcopy(matrix)
-V_max = 1
-time_Step = 100
-tmp = copy.deepcopy(arrival_time_list) #拷贝到达时间列表
-cmap = colors.ListedColormap(['blue','red','white','white','white','white','black','gray'])
-bounds = [-2,-1, 0, 1, 2, 3, 4, 5, 6]
-norm = colors.BoundaryNorm(bounds, cmap.N)
-# 初始化地图画布
-fig, ax = plt.subplots(figsize=(5, 5))
-
-# 绘制初始 agv_matrix，排除 -1 和 -2 的部分
-for i in range(len(agv_matrix)):
-    for j in range(len(agv_matrix[i])):
-        if agv_matrix[i][j] not in [-1, -2]:
-            rect = plt.Rectangle((j-0.5, i-0.5), 1, 1, color=cmap(norm(agv_matrix[i][j])))
-            ax.add_patch(rect)
-
-# 重新设置坐标轴的限制和比例，包括边框
-ax.set_xlim(-0.5, len(agv_matrix[0])-0.5)
-ax.set_ylim(len(agv_matrix)-0.5, -0.5)
-ax.set_aspect('equal')
-ax.spines['top'].set_visible(True)
-ax.spines['right'].set_visible(True)
-ax.spines['bottom'].set_visible(True)
-ax.spines['left'].set_visible(True)
-ax.set_xticks(np.arange(-0.5, len(agv_matrix[0])-0.5, 1))
-ax.set_yticks(np.arange(-0.5, len(agv_matrix)-0.5, 1))
-ax.set_xticklabels([])
-ax.set_yticklabels([])
-ax.grid(color='black', linestyle='-', linewidth=1)
-ax.set_title('AGV Simulation')
-
-# 进行仿真，每次刷新间隔1000毫秒
-animation = FuncAnimation(fig, simulate, fargs=(ax, agv_matrix), frames=time_Step, repeat=False, blit=False, interval=100)
-#plt.show()
-
-# 保存动画为GIF
-animation.save('agv_simulation_big.gif', writer='imagemagick', fps=10)
-
-
-
+    # 初始化AGV列表,v_max为最大速度, time_step为仿真时间步长
+    agvs = []
+    V_max = 1
+    time_Step = 200
+    tmp = copy.deepcopy(arrival_time_list) #拷贝到达时间列表
+    
+    main(matrix, entrances, exits, destinations, arrival_time_list, task_list, agvs, V_max, time_Step)
 
 
 
