@@ -117,19 +117,22 @@ def main(matrix, entrances, exits, destinations, arrival_time_list, task_list, a
 
     # 进行仿真，每次刷新间隔1000毫秒
     animation = FuncAnimation(fig, simulate, fargs=(ax, agv_matrix, task_list, arrival_time_list), frames=time_Step, repeat=False, blit=False, interval=1000)
-    plt.show()
+    #plt.show()
 
     # 保存动画为GIF
-    #animation.save('agv_simulation_big.gif', writer='imagemagick', fps=10)
+    animation.save('agv_simulation_big.gif', writer='imagemagick', fps=10)
 
+# 任务日志记录任务信息和每步AGV信息
+def log_task():
+    pass
 
 if __name__ == '__main__':
     random.seed(42)
     # 路网矩阵 
-    matrix, entrances, exits, destinations = load_map('CAsimulator\map_file\small_map.xlsx')
+    matrix, entrances, exits, destinations = load_map('CAsimulator\map_file\\big_map.xlsx')
 
     # 生成随机到达任务时间列表
-    arrival_time_list = [random.randint(0,10) for i in range(10)]
+    arrival_time_list = [random.randint(0,10) for i in range(30)]
     arrival_time_list.sort()
 
     # 生成任务列表
@@ -138,7 +141,7 @@ if __name__ == '__main__':
     # 初始化AGV列表,v_max为最大速度, time_step为仿真时间步长
     agvs = []
     V_max = 1
-    time_Step = 200
+    time_Step = 50
     tmp = copy.deepcopy(arrival_time_list) #拷贝到达时间列表
     
     main(matrix, entrances, exits, destinations, arrival_time_list, task_list, agvs, V_max, time_Step)
