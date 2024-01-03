@@ -75,6 +75,16 @@ def StAstar(array, start, goal, StTable):
     if start[0] == len(array)-1:
         last_orientation = (-1,0)
     
+    # 投递口周围初始方向，大型地图
+    if start[0] in [2,5,8,11,14,17,20,23]:
+        last_orientation = (0,-1)
+    if start[0] in [4,7,10,13,16,19,22,25]:
+        last_orientation = (0,1)
+    if start[1] in [1,4,7,10,13,16,19,22,25,28]:
+        last_orientation = (-1,0)
+    if start[1] in [3,6,9,12,15,18,21,24,27,30]:
+        last_orientation = (1,0)
+    
     heapq.heappush(oheap, (fscore[start], start))
 
     while oheap:
@@ -86,12 +96,13 @@ def StAstar(array, start, goal, StTable):
         for neighbor in [(0,1),(0,-1),(1,0),(-1,0)]:
             if (current[0]+neighbor[0],current[1]+neighbor[1]) == goal:
                 data = []
+                stop_position = (current[0], current[1], current[2])
                 data.append(goal)
                 while current in came_from:
                     data.append(current)
                     current = came_from[current]
                 data.append(start)
-                return data[::-1], data[1][2] - data[-1][2]
+                return data[::-1], stop_position
         # 判断该点可达的邻居
         neighbors=find_neighbors(current,array)
         for i, j in neighbors:

@@ -1,7 +1,7 @@
 import heapq
 import numpy as np
 import numpy as np
-
+from castastar import *
 
 # 定义任务类
 class task:
@@ -10,8 +10,17 @@ class task:
         self.destination = destination
         self.exit = self.find_nearest_exit(matrix,self.destination)
         self.path_to_destination, self.stop_position = self.Astar(matrix, self.entrance, self.destination)
+        #self.path_to_destination, self.stop_position = StAstar(matrix, self.entrance, self.destination, ST_Table)
         self.path_to_exit, _ = self.Astar(matrix, self.path_to_destination[-1], self.exit)
+        #self.path_to_exit, _ = StAstar(matrix, self.stop_position, self.exit,ST_Table)
         self.full_path = self.path_to_destination + self.path_to_exit[1:] + [self.exit]
+        '''self.full_path = self.path_to_destination[:-1] + self.path_to_exit[1:] + [self.exit]
+        tmp = []
+        for i in self.full_path:
+            node = i[:2]
+            if node not in tmp:
+                tmp.append(node)
+        self.full_path = tmp'''
         self.arrival_time = arrival_time
 
     def heuristic(self, a, b, array,raw_orientation=None,new_orientation=None):

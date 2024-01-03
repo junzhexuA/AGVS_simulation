@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import random
 import matplotlib.colors as colors
 from mpl_toolkits.mplot3d import Axes3D
+
 # 决策单元 1
 # 取货单元 2
 # 出口单元 3
@@ -15,7 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class Map:
     def __init__(self):
-        excel_path='big_map.xlsx'
+        excel_path='map.xlsx'
         df=pd.read_excel(excel_path,header=None)
         self.map=np.array(df)
     def rand_start(self):
@@ -82,7 +83,11 @@ def threeD_path(path):
     fig = plt.figure(figsize=(20, 20))
     ax = fig.add_subplot(111, projection='3d')
 
-   # 用于存储所有点以检测重合
+    # 设置中文字体
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['axes.unicode_minus'] = False
+
+    # 用于存储所有点以检测重合
     all_points = set()
     collision_points = []
 
@@ -106,9 +111,9 @@ def threeD_path(path):
         ax.text(point[0], point[1], point[2], 'collision', color='red')
 
     # 设置坐标轴标签
-    ax.set_xlabel('Row')
-    ax.set_ylabel('Column')
-    ax.set_zlabel('Time')
+    ax.set_xlabel('行索引')
+    ax.set_ylabel('列索引')
+    ax.set_zlabel('时间')
 
     # 显示图形
     plt.show()
