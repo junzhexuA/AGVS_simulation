@@ -10,24 +10,24 @@ def heuristic(a, b, array,raw_orientation=None,new_orientation=None):
 def find_neighbors(point,array=None):
     # 小型地图
     neighbors=[]
-    if point[0] in [1,4,7]:
+    '''if point[0] in [1,4,7]:
         neighbors.append((0,1))
     if point[0] in [2,5,8]:
         neighbors.append((0,-1))
     if point[1] in [0,3,6]:
         neighbors.append((1,0))
     if point[1] in [1,4,7]:
-        neighbors.append((-1,0))
+        neighbors.append((-1,0))'''
 
-    '''# 大型地图
+    # 大型地图
     if point[0] in [1,4,7,10,13,16,19,22,25]:
         neighbors.append((0,1))
     if point[0] in [2,5,8,11,14,17,20,23,26]:
         neighbors.append((0,-1))
-    if point[1] in [0,3,6,9,12,15,18,21,24,27]:
+    if point[1] in [0,3,6,9,12,15,18,21,24,27,30]:
         neighbors.append((1,0))
-    if point[1] in [1,4,7,10,13,16,19,22,25,28]:
-        neighbors.append((-1,0))'''
+    if point[1] in [1,4,7,10,13,16,19,22,25,28,31]:
+        neighbors.append((-1,0))
     return neighbors
 
 def update_StTable(raw_map, StTable, path):

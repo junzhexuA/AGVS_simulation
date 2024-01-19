@@ -19,8 +19,8 @@ if __name__ == '__main__':
     '''start = [(0, 3, 5), (9, 4, 5), (0, 0, 6), (0, 3, 6)]
     end = [raw_map.rand_end() for _ in range(len(start))]'''
 
-    start = [(0,0,33)]
-    end = [(3, 5)]
+    start = [(0,0,3)]
+    end = [(6,2)]
     print('地图：\n',raw_map.map)
     #print('出发点：',start)
     #print('终点：',end)
@@ -57,4 +57,4 @@ if __name__ == '__main__':
         print(f'AGV{i}路径：', path[i])
         visualize_map(raw_map.map, path[i][0], path[i][-1], path[i])
     #3D可视化
-    threeD_path(path)
+    #threeD_path(path)

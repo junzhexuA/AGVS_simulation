@@ -1,6 +1,9 @@
 import heapq
 import numpy as np
 
+alpha = 5
+beta = 0.5
+
 def heuristic(a, b, array,raw_orientation=None,new_orientation=None):
     """
     计算两个点之间的曼哈顿距离
@@ -58,13 +61,13 @@ def is_start_used(StTable, start):
     # 检查start是否占用
     return StTable[start[2]][start[0]][start[1]] == 6
 
-def StAstar(array, start, goal, StTable):
+def StAstar(array, start, goal, direction=None):
     """
     A* 寻路算法
     """
-    if len(StTable) - 1 > start[2]:
+    '''if len(StTable) - 1 > start[2]:
         while StTable[start[2]][start[0]][start[1]] == 6:
-            start = update_start(StTable,start)
+            start = update_start(StTable,start)'''
 
     close_set = set()
     came_from = {}
@@ -85,6 +88,8 @@ def StAstar(array, start, goal, StTable):
         last_orientation = (-1,0)
     if start[1] in [3,6]:
         last_orientation = (1,0)
+    else:
+        last_orientation = direction
     
     heapq.heappush(oheap, (fscore[start], start))
 
@@ -146,9 +151,13 @@ def StAstar(array, start, goal, StTable):
             
             # 如果要转向，距离额外加1
             if last_orientation!=(i,j):
-                tentative_g_score = gscore[current] + heuristic(current, neighbor, array) + 1  
+                #tentative_g_score = gscore[current] + heuristic(current, neighbor, array) + 1 + 1/network_weight[current[0]][current[1]]
+                #tentative_g_score = gscore[current] + heuristic(current, neighbor, array) + 1
+                tentative_g_score = gscore[current] + heuristic(current, neighbor, array) + 1 + 1 / (1 + np.exp(alpha * (network_weight[current[0]][current[1]] - beta)))
             else:
-                tentative_g_score = gscore[current] + heuristic(current, neighbor, array)
+                #tentative_g_score = gscore[current] + heuristic(current, neighbor, array) + 1/network_weight[current[0]][current[1]]
+                #tentative_g_score = gscore[current] + heuristic(current, neighbor, array)
+                tentative_g_score = gscore[current] + heuristic(current, neighbor, array) + 1 / (1 + np.exp(alpha * (network_weight[current[0]][current[1]] - beta)))
             # 如果距离更远，排除
             if neighbor in close_set  and tentative_g_score > gscore.get(neighbor, 0):
                 signal = 0
@@ -159,7 +168,9 @@ def StAstar(array, start, goal, StTable):
                 if neighbor[2] - current[2] == 1:
                     came_from[neighbor] = current
                     gscore[neighbor] = tentative_g_score
-                    fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
+                    #fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array) + 1/network_weight[neighbor[0]][neighbor[1]]
+                    #fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
+                    fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array) + 1 / (1 + np.exp(alpha * (network_weight[current[0]][current[1]] - beta)))
                     heapq.heappush(oheap, (fscore[neighbor], neighbor))
                     signal=1
                 #若时间步差2，则表示转向和等待   
@@ -168,7 +179,9 @@ def StAstar(array, start, goal, StTable):
                     came_from[tmp] = current
                     came_from[neighbor] = tmp
                     gscore[neighbor] = tentative_g_score
-                    fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
+                    #fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array) + 1/network_weight[neighbor[0]][neighbor[1]]
+                    #fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array)
+                    fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal,array) + 1 / (1 + np.exp(alpha * (network_weight[current[0]][current[1]] - beta)))
                     heapq.heappush(oheap, (fscore[neighbor], neighbor))
                     signal=1
                 '''

@@ -16,21 +16,21 @@ class AGV:
         self.agv_state_value = [-1,-2]
 
         # 初始化方向, 小型地图
-        if position[0] in [0,9] and position[1] in [0,3,6]:
+        '''if position[0] in [0,9] and position[1] in [0,3,6]:
             self.direction = (1,0)
         if position[0] in [0,9] and position[1] in [1,4,7]:
-            self.direction = (-1,0)
+            self.direction = (-1,0)'''
         
         # 初始化方向, 大型地图
-        '''if position[0] in [0,27] and position[1] in [0,3,6,9,12,15,18,21,24,27,30]:
+        if position[0] in [0,27] and position[1] in [0,3,6,9,12,15,18,21,24,27,30]:
             self.direction = (1,0)
         if position[0] in [0,27] and position[1] in [1,4,7,10,13,16,19,22,25,28,31]:
-            self.direction = (-1,0)'''
+            self.direction = (-1,0)
 
     def update_speed(self, matrix):
         # 加速规则
         self.speed = min(self.V_max, self.speed + 1)
-
+  
         # 减速规则,防止碰撞
         dn = self.calculate_dn(matrix)
         self.speed = min(self.speed, dn)
